@@ -1,0 +1,94 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<title>Insert title here</title>
+<script src="http://code.jquery.com/jquery-1.12.4.min.js"></script>
+<script type="text/javascript" src="socket.io.js"></script>
+<style>
+	body { 
+		padding:20px;
+	}
+	#console {  
+		overflow: auto; 
+	}
+	.username-msg {color:orange;}
+	.connect-msg {color:green;}
+	.disconnect-msg {color:red;}
+	.send-msg {color:#888}
+</style>
+</head>
+
+<body>
+    <div id="console" class="well">
+    </div><br/><br/>
+   
+    current_price:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+    <span id="current_price"></span><br/>
+    
+</body>
+         
+<script type="text/javascript">
+	var socket =  io.connect('http://localhost:4001', {
+		transports:['websocket']
+	});
+        
+	socket.on('connect', function() {
+		console.log("msg页面连接成功！");
+		socket.emit('sub', "channel_1");
+		output('<span class="connect-msg">Client has connected to the server!</span>');
+		output('<span class="connect-msg">Client send {"event": "sub", "channel": "channel_1"}</span>');
+	});
+	
+	socket.on('disconnect', function() {
+		output('<span class="disconnect-msg">The client has disconnected!</span>');
+	});
+
+	socket.on('channel_1', function(data) {
+		var jsonObj = eval("(" + data + ")");
+		console.log("收到cfd_md的消息：" + data);
+		$("#current_price").html(jsonObj.current_price);
+	});
+	
+			 
+	function output(message) {
+		var currentTime = "<span class='time'>" +  NowTime() + "</span>";
+		var element = $("<div>" + currentTime + " " + message + "</div>");
+		$('#console').prepend(element);
+	}
+		
+	// 获取当前时间
+	function NowTime() {
+		var time=new Date();
+		var year=time.getFullYear();//获取年
+		var month=time.getMonth()+1;//或者月
+		var day=time.getDate();//或者天
+		var hour=time.getHours();//获取小时
+		var minu =time.getMinutes();//获取分钟
+		var second=time.getSeconds();//或者秒
+		var data=year+"-";
+		if(month<10){
+			data+="0";
+		}
+		data+=month+"-";
+		if(day<10){
+			data+="0"
+		}
+		data+=day+" ";
+		if(hour<10){
+			data+="0"
+		}
+		data+=hour+":";
+		if(minu<10){
+			data+="0"
+		}
+		data+=minu+":";
+		if(second<10){
+			data+="0"
+		}
+		data+=second;
+		return data;
+	}
+        
+</script>
+</html>
